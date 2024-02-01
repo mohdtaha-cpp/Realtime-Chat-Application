@@ -1,0 +1,11 @@
+spring:
+  data:
+    mongodb:
+      username: taha
+      password: taha
+      host: localhost
+      port: 27017
+      database: realtime_chat
+      authentication-database: admin
+server:
+  port: 8088
