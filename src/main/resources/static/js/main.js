@@ -8,6 +8,11 @@ const messageInput = document.querySelector('#message');
 const connectingElement = document.querySelector('.connecting');
 const chatArea = document.querySelector('#chat-messages');
 const logout = document.querySelector('#logout');
+const applicationTitle = document.querySelector('#application-title')
+const monthsOfYear = [
+    "Jan", "Feb", "March", "April",
+    "May", "June", "July", "Aug",
+    "Sep", "Oct", "Nov", "Dec"];
 
 let stompClient = null;
 let nickname = null;
@@ -21,6 +26,8 @@ function connect(event) {
     if (nickname && fullname) {
         usernamePage.classList.add('hidden');
         chatPage.classList.remove('hidden');
+        applicationTitle.style.paddingBottom = "1em"
+        applicationTitle.style.margin = "0em"
 
         const socket = new SockJS('/ws');
         stompClient = Stomp.over(socket);
@@ -40,7 +47,9 @@ function onConnected() {
         {},
         JSON.stringify({nickName: nickname, fullName: fullname, status: 'ONLINE'})
     );
-    document.querySelector('#connected-user-fullname').textContent = fullname;
+    document.querySelector('#connected-user-fullname').textContent = "Your Profile: " + fullname;
+    document.querySelector('#connected-user-fullname').style.margin = "0em"
+    document.querySelector('#connected-user-fullname').style.fontWeight = "600"
     findAndDisplayConnectedUsers().then();
 }
 
@@ -104,7 +113,7 @@ function userItemClick(event) {
 
 }
 
-function displayMessage(senderId, content) {
+function displayMessage(senderId, content, timestamp) {
     const messageContainer = document.createElement('div');
     messageContainer.classList.add('message');
     if (senderId === nickname) {
@@ -112,9 +121,17 @@ function displayMessage(senderId, content) {
     } else {
         messageContainer.classList.add('receiver');
     }
+
     const message = document.createElement('p');
+    const timestampContainer = document.createElement('p')
     message.textContent = content;
+    timestampContainer.textContent = timestamp;
+    timestampContainer.style.fontSize = "10px"
+    timestampContainer.style.display = "flex"
+    timestampContainer.style.justifyContent = "flex-end"
+
     messageContainer.appendChild(message);
+    messageContainer.appendChild(timestampContainer);
     chatArea.appendChild(messageContainer);
 }
 
@@ -123,7 +140,8 @@ async function fetchAndDisplayUserChat() {
     const userChat = await userChatResponse.json();
     chatArea.innerHTML = '';
     userChat.forEach(chat => {
-        displayMessage(chat.senderId, chat.content);
+        const receivedTimestamp = new Date(chat.timestamp);
+        displayMessage(chat.senderId, chat.content, convertTime(receivedTimestamp));
     });
     chatArea.scrollTop = chatArea.scrollHeight;
 }
@@ -134,18 +152,29 @@ function onError() {
     connectingElement.style.color = 'red';
 }
 
+function convertTime(timestamp) {
+    const displayTimestamp = timestamp.getDate() + " " + monthsOfYear[timestamp.getMonth()] + " "
+                                + timestamp.getFullYear() + ", " + String(timestamp.getHours()).padStart(2, '0')
+                                + ":" + String(timestamp.getMinutes()).padStart(2, '0')
+
+    return displayTimestamp
+}
+
 
 function sendMessage(event) {
     const messageContent = messageInput.value.trim();
+    const sentTimestamp = new Date();
+
     if (messageContent && stompClient) {
         const chatMessage = {
             senderId: nickname,
             recipientId: selectedUserId,
             content: messageInput.value.trim(),
-            timestamp: new Date()
+            timestamp: sentTimestamp
         };
         stompClient.send("/app/chat", {}, JSON.stringify(chatMessage));
-        displayMessage(nickname, messageInput.value.trim());
+
+        displayMessage(nickname, messageInput.value.trim(), convertTime(sentTimestamp));
         messageInput.value = '';
     }
     chatArea.scrollTop = chatArea.scrollHeight;
@@ -158,7 +187,10 @@ async function onMessageReceived(payload) {
     console.log('Message received', payload);
     const message = JSON.parse(payload.body);
     if (selectedUserId && selectedUserId === message.senderId) {
-        displayMessage(message.senderId, message.content);
+
+        const receivedTimestamp = new Date(message.timestamp)
+
+        displayMessage(message.senderId, message.content, convertTime(receivedTimestamp));
         chatArea.scrollTop = chatArea.scrollHeight;
     }
 
