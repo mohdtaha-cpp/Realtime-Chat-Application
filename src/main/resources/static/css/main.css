@@ -9,6 +9,12 @@ body {
     flex-direction: column;
 }
 
+#application-title {
+    padding: 2em;
+    padding-top: 0em;
+    font-size: 2rem;
+}
+
 .chat-container {
     display: flex;
     max-width: 800px;
@@ -181,8 +187,8 @@ body {
 }
 
 .user-form input {
-    width: 100%;
-    padding: 10px 0;
+    width: 90%;
+    padding: 10px 10px;
     border: 1px solid #ccc;
     border-radius: 5px;
     margin-bottom: 20px;
@@ -235,8 +241,64 @@ a.logout:hover {
     align-items: center;
 }
 
-#application-title {
-    padding: 2em;
-    padding-top: 0em;
-    font-size: 2rem;
+
+
+/* Media Queries (600px) - Mobile support */
+@media screen and (max-width: 600px) {
+    body {
+        padding: 1em;
+    }
+    .user-form {
+        width: 90%;
+        padding: 1em;
+    }
+
+    .user-form h2 {
+        font-size: 1.25rem;
+    }
+
+    #application-title {
+        padding: 0em;
+        padding-bottom: 1em;
+        font-size: 1.25rem;
+    }
+
+    .chat-container {
+        max-width: 100%;
+        min-width: 100%;
+        min-height: 600px;
+        max-height: 600px;
+        margin: 0px;
+    }
+
+    .chat-area {
+        padding: 4px;
+    }
+}
+
+
+/* Media Queries (600px - 900px) - Tablet support */
+@media screen and (min-width: 600px) and (max-width: 900px) {
+    .user-form {
+        width: 70%;
+        padding: 1em;
+    }
+
+    .user-form h2 {
+        font-size: 1.5rem;
+    }
+
+    .chat-container {
+        max-width: 90%;
+        min-width: 90%;
+        min-height: 600px;
+        max-height: 600px;
+        margin: 0px;
+    }
+
+    #application-title {
+        padding: 1em;
+        padding-top: 0em;
+        font-size: 1.5rem;
+    }
 }
